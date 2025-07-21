@@ -1,6 +1,6 @@
+<img src="./++C_Logo.png" alt="++Ↄ Logo" width="200"/>
+
 ++C/++Ↄ is an esolang that is based on C++.
-
-
 
 basic syntax:
 ```
