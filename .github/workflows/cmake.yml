@@ -2,10 +2,7 @@ name: CMake Build
 
 on:
   push:
-    branches: [ main ]
-    tags: [ '*' ]
-  pull_request:
-    branches: [ main ]
+    tags: [ '*' ]   # ONLY run on tags
 
 jobs:
   build:
@@ -31,39 +28,15 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: List built files (debugging)
-        shell: bash
-        run: |
-          echo "Contents of build folder:"
-          if [[ "$RUNNER_OS" == "Windows" ]]; then
-            pwsh -Command "Get-ChildItem -Recurse -Force build"
-          else
-            ls -al build
-          fi
-
       - name: Rename ++C binary (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
           mv build/++C build/ppc || echo "Rename skipped (binary not found)"
 
-      - name: Test run binary (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          ./build/ppc || ./build/++C || echo "Binary may have special chars"
-
-      - name: Test run binary (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          Get-ChildItem -Recurse -Force build
-          .\build\Release\++C.exe || echo "Run failed"
-
       - name: Prepare release folder
-        if: startsWith(github.ref, 'refs/tags/')
         run: mkdir release
 
       - name: Copy binaries to release folder
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             cp build/Release/++C.exe release/
@@ -71,17 +44,7 @@ jobs:
             cp build/ppc release/ || cp build/++C release/ || echo "No binary found"
           fi
 
-      - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        id: create_release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release asset
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create Release and Upload Assets
         uses: softprops/action-gh-release@v1
         with:
           files: release/*
