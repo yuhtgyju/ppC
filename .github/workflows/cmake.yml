@@ -3,7 +3,7 @@ name: CMake Build
 on:
   push:
     branches: [ main ]
-    tags: [ '*' ]  # Trigger on tag push
+    tags: [ '*' ]
   pull_request:
     branches: [ main ]
 
