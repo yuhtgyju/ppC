@@ -59,9 +59,11 @@ jobs:
           .\build\Release\++C.exe || echo "Run failed"
 
       - name: Prepare release folder
+        if: startsWith(github.ref, 'refs/tags/')
         run: mkdir release
 
       - name: Copy binaries to release folder
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           if [[ "${{ runner.os }}" == "Windows" ]]; then
             cp build/Release/++C.exe release/
@@ -70,6 +72,7 @@ jobs:
           fi
 
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
@@ -78,6 +81,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload release asset
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
           files: release/*
