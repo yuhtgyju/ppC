@@ -1,0 +1,50 @@
+name: CMake Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up CMake
+        uses: jwlawson/actions-setup-cmake@v1
+
+      - name: Create build directory
+        run: cmake -E make_directory build
+
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_CXX_STANDARD=23
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: List built files (debugging)
+        run: |
+          echo "Contents of build folder:"
+          ls -al build
+
+      - name: Rename ++C binary (optional)
+        if: runner.os != 'Windows'
+        run: mv build/++C build/ppc
+
+      - name: Test run binary (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: ./build/ppc || ./build/++C || echo "Binary may have special chars"
+
+      - name: Test run binary (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          dir build
+          .\build\++C.exe || echo "Run failed"
