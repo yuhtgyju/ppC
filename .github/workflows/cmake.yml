@@ -2,7 +2,8 @@ name: CMake Build
 
 on:
   push:
-    tags: [ '*' ]   # ONLY run on tags
+    tags:
+      - '*'
 
 jobs:
   build:
