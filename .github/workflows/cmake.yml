@@ -3,6 +3,7 @@ name: CMake Build
 on:
   push:
     branches: [ main ]
+    tags: [ '*' ]
   pull_request:
     branches: [ main ]
 
@@ -31,9 +32,14 @@ jobs:
         run: cmake --build build --config Release
 
       - name: List built files (debugging)
+        shell: bash
         run: |
           echo "Contents of build folder:"
-          ls -al build
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            pwsh -Command "Get-ChildItem -Recurse -Force build"
+          else
+            ls -al build
+          fi
 
       - name: Rename ++C binary (optional)
         if: runner.os != 'Windows'
@@ -46,5 +52,5 @@ jobs:
       - name: Test run binary (Windows)
         if: runner.os == 'Windows'
         run: |
-          dir build
+          Get-ChildItem -Recurse -Force build
           .\build\++C.exe || echo "Run failed"
